@@ -9,7 +9,7 @@ func TestContent(t *testing.T) {
 	type Node struct {
 		Node      *Node       `json:"node"`
 		Name      string      `json:"name"`
-		Address   string      `json:"address,options=[beijing,shanghai]"`
+		Address   string      `json:"address"`
 		Age       int         `json:"age"`
 		Iface     interface{} `json:"iface"`
 		anonymous bool
@@ -55,6 +55,9 @@ func TestContent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			j := New().LoadContent(tt.data)
 			fmt.Println(*j.jsonContent)
+			jj := Node{}
+			j.Unmarshal(&jj)
+			fmt.Println(jj)
 			//if got := New(); !reflect.DeepEqual(got, tt.want) {
 			//	t.Errorf("New() = %v, want %v", got, tt.want)
 			//}
