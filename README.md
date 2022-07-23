@@ -38,25 +38,33 @@ gojson是一个支持数据多种方式读取,智能解析,操作便捷的一个
 <summary>展开查看</summary>
 <pre>
 <code>
-    ├── internal          		   (内部工具包)
-    	├── conv                   (数据转换)
+    ├── internal  ----------------------(内部工具包)
+    	├── conv  ----------------------(数据转换)
     		├── byte.go
     		├── map.go
     		├── string.go
-    	├── mutex                  (读写锁)
+    	├── encoding  ------------------(编码包)
+    		├── ini
+    			├── ini.go
+    		├── toml
+    			├── toml.go
+    		├── xml
+    			├── xml.go
+    		├── yaml
+    			├── yaml.go
+    	├── mutex  ---------------------(读写锁)
     		├── mutes.go
-    	├── regex                  (正则匹配)
+    	├── regex  ---------------------(正则匹配)
     		├── regex.go 
-    	├── types                  (类型操作)
-    		├── interface.go 
-    ├── const.go                   (常量定义)
-    ├── err.go                     (错误定义)
-    ├── gojson.go                  (用户可操作函数)
-    ├── load.go                    (数据加载相关的函数)
-    ├── option.go                  (选项相关的函数)
+    ├── const.go  ----------------------(常量定义)
+    ├── err.go  ------------------------(错误定义)
+    ├── gojson.go  ---------------------(用户可操作函数)
+    ├── load.go  -----------------------(数据加载相关的函数)
+    ├── option.go  ---------------------(选项相关的函数)
 </code>
 </pre>
 </details>
+
 
 # 📌 TODO
 
