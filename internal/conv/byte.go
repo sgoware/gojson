@@ -1,5 +1,11 @@
 package conv
 
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
+
 func Bytes(any interface{}) []byte {
 	if any == nil {
 		return nil
@@ -10,7 +16,18 @@ func Bytes(any interface{}) []byte {
 	case []byte:
 		return value
 	default:
-		// TODO: 待修改
-		return nil
+		originKind := reflect.ValueOf(any).Kind()
+		switch originKind {
+		case reflect.Map:
+			bytes, err := json.Marshal(any)
+			if err != nil {
+				fmt.Println("err")
+				return nil
+			}
+			return bytes
+		case reflect.Array, reflect.Slice:
+			// TODO: 待支持
+		}
 	}
+	return nil
 }
