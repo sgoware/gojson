@@ -2,6 +2,7 @@ package gojson
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gojson/internal/conv"
 	"gojson/internal/mutex"
@@ -97,7 +98,12 @@ func (j *Json) LoadHttpResponseBodyWithOptions() *Json {
 }
 
 func (j *Json) Unmarshal(dest interface{}) error {
+	if !j.isValid {
+		return errors.New(invalidJsonObject)
+	}
+	j.mu.Lock()
 	bytes, err := json.Marshal(*j.jsonContent)
+	j.mu.Unlock()
 	if err != nil {
 		fmt.Println(err)
 		return err
