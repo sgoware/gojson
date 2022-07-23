@@ -1,5 +1,3 @@
-[example](https://github.com/panjf2000/gnet/blob/dev/README_ZH.md)
-
 # gojson
 
 [![build](https://img.shields.io/badge/build-1.01-brightgreen)](https://github.com/StellarisW/StellarisW)[![go-version](https://img.shields.io/badge/go-%3E%3D1.8-30dff3?logo=go)](https://github.com/StellarisW/StellarisW)[![OpenTracing Badge](https://img.shields.io/badge/OpenTracing-enabled-blue.svg)](http://opentracing.io)[![Go Report Card](https://goreportcard.com/badge/github.com/emirpasic/gods)](https://goreportcard.com/report/github.com/emirpasic/gods)[![PyPI](https://img.shields.io/badge/License-BSD_2--Clause-green.svg)](https://github.com/emirpasic/gods/blob/master/LICENSE)
