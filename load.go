@@ -4,10 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"gojson/internal/encoding/ini"
+	"gojson/internal/encoding/toml"
+	"gojson/internal/encoding/xml"
+	"gojson/internal/encoding/yaml"
 	"gojson/internal/regex"
 )
 
 func (j *Json) parseContent(content []byte, options Options) *Json {
+	var err error
 	if options.ContentType == "" {
 		options.ContentType = getContentType(content)
 		if options.ContentType == "" {
@@ -21,14 +26,25 @@ func (j *Json) parseContent(content []byte, options Options) *Json {
 	case ContentTypeJson:
 
 	case ContentTypeXml:
-
+		if content, err = xml.ToJson(content); err != nil {
+			j.isValid = false
+			return j
+		}
 	case ContentTypeYaml:
-
+		if content, err = yaml.ToJson(content); err != nil {
+			j.isValid = false
+			return j
+		}
 	case ContentTypeToml:
-
+		if content, err = toml.ToJson(content); err != nil {
+			j.isValid = false
+			return j
+		}
 	case ContentTypeIni:
-
-	default:
+		if content, err = ini.ToJson(content); err != nil {
+			j.isValid = false
+			return j
+		}
 	}
 
 	// 使用json decoder将数据解码成map[string]interface{}形式
