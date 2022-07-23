@@ -21,7 +21,6 @@ func (j *Json) parseContent(content []byte, options Options) *Json {
 			return j
 		}
 	}
-	// TODO: 将其他格式的数据转换成json格式的数据
 	switch options.ContentType {
 	case ContentTypeJson:
 
