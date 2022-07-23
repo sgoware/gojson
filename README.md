@@ -63,11 +63,11 @@ gojson是一个支持数据多种方式读取,智能解析,操作便捷的一个
 - [ ] json的序列化
     - [x] string,[]byte的序列化
         - [x] json格式
-        - [ ] 其他类型的格式(toml,yaml,xml,ini)
+        - [x] 其他类型的格式(toml,yaml,xml,ini)  XML格式未完成...
         - [x] 结构体序列化
         - [ ] 切片,数据序列化
         - [ ] map序列化
-        - [ ] 多tag校验
+        - [x] 多tag校验
 - [x] json的反序列化(将json数据unmarshal到结构体)
 - [ ] json的数据操作
     - [ ] 查找
