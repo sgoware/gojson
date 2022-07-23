@@ -1,6 +1,7 @@
 package gojson
 
 import (
+	"encoding/json"
 	"fmt"
 	"gojson/internal/conv"
 	"gojson/internal/mutex"
@@ -9,9 +10,8 @@ import (
 
 type Json struct {
 	mu          *mutex.RWMutex // 开启安全模式:有指针,关闭时:空指针
-	raw         *interface{}
-	jsonContent *interface{} // 使用指针传递,效率更高
-	isValid     bool         // 查看Json对象是否有效
+	jsonContent *interface{}   // 使用指针传递,效率更高
+	isValid     bool           // 查看Json对象是否有效
 }
 
 type iVal interface {
@@ -93,5 +93,23 @@ func (j *Json) LoadFileWithOptions() *Json {
 }
 
 func (j *Json) LoadHttpResponseBodyWithOptions() *Json {
+	return nil
+}
+
+func (j *Json) Unmarshal(dest interface{}) error {
+	bytes, err := json.Marshal(*j.jsonContent)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = json.Unmarshal(bytes, dest)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (j *Json) Get() *Json {
 	return nil
 }
