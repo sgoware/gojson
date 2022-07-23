@@ -5,4 +5,5 @@ const (
 	emptyContest       = "get empty content"
 	invalidContentType = "invalid content type"
 	decodeErr          = "decode content failed"
+	invalidJsonObject  = "invalid json object"
 )
