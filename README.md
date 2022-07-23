@@ -25,6 +25,7 @@ gojson是一个支持数据多种方式读取,智能解析,操作便捷的一个
     - 支持将任意形式`(嵌套,指针,切片,数组,map,空接口)`的结构体`unmarshal`成`json`格式
     - 支持将其他格式`(yaml,toml,xml...)`的数据转化成`json`格式
     - 支持从文件读取数据
+    - 并发安全
     
 - 操作便捷
 
@@ -34,7 +35,8 @@ gojson是一个支持数据多种方式读取,智能解析,操作便捷的一个
 
 <details>
 <summary>展开查看</summary>
-<pre><code>
+<pre>
+<code>
     ├── internal          		   (内部工具包)
     	├── conv                   (数据转换)
     		├── byte.go
@@ -50,20 +52,21 @@ gojson是一个支持数据多种方式读取,智能解析,操作便捷的一个
     ├── err.go                     (错误定义)
     ├── gojson.go                  (用户可操作函数)
     ├── load.go                    (数据加载相关的函数)
-    ├── option.go                  (选项相关的函数)             
-</pre></code>
+    ├── option.go                  (选项相关的函数)
+</code>
+</pre>
 </details>
 
 # 📌 TODO
 
 - [ ] json的序列化
     - [x] string,[]byte的序列化
-            - [x] json格式
-            - [ ] 其他类型的格式(toml,yaml,xml,ini)
-            - [x] 结构体序列化
-            - [ ] 切片,数据序列化
-            - [ ] map序列化
-- [ ] json的反序列化(将json数据unmarshal到结构体)
+        - [x] json格式
+        - [ ] 其他类型的格式(toml,yaml,xml,ini)
+        - [x] 结构体序列化
+        - [ ] 切片,数据序列化
+        - [ ] map序列化
+- [x] json的反序列化(将json数据unmarshal到结构体)
 - [ ] json的数据操作
     - [ ] 查找
     - [ ] 插入
