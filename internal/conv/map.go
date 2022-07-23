@@ -7,13 +7,13 @@ import (
 // Map
 // 不带递归的map(结构体没有嵌套的时候使用)
 func Map(value interface{}, tags ...string) map[string]interface{} {
-	return convert(value, false, tags)
+	return convert(value, false, tags...)
 }
 
 // MapSearch
 // 带递归的map搜索(含嵌套或者嵌套指针结构体的时候使用)
 func MapSearch(value interface{}, tags ...string) map[string]interface{} {
-	return convert(value, true, tags)
+	return convert(value, true, tags...)
 }
 
 // convert
