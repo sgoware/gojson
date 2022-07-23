@@ -6,21 +6,25 @@ import (
 
 // Map
 // 不带递归的map(结构体没有嵌套的时候使用)
-func Map(value interface{}, tag string) map[string]interface{} {
-	return convert(value, false, tag)
+func Map(value interface{}, tags ...string) map[string]interface{} {
+	return convert(value, false, tags)
 }
 
 // MapSearch
 // 带递归的map搜索(含嵌套或者嵌套指针结构体的时候使用)
-func MapSearch(value interface{}, tag string) map[string]interface{} {
-	return convert(value, true, tag)
+func MapSearch(value interface{}, tags ...string) map[string]interface{} {
+	return convert(value, true, tags)
 }
 
 // convert
 // 将数据转换成map[string]interface{}
-func convert(value interface{}, recursive bool, tag string) map[string]interface{} {
+func convert(value interface{}, recursive bool, tags ...string) map[string]interface{} {
 	if value == nil {
 		return nil
+	}
+	tagPriority := StructTagPriority
+	if len(tags) != 0 {
+		tagPriority = append(tags, StructTagPriority...)
 	}
 	var reflectValue reflect.Value
 	if v, ok := value.(reflect.Value); ok {
@@ -39,7 +43,7 @@ func convert(value interface{}, recursive bool, tag string) map[string]interface
 	case reflect.Slice, reflect.Array:
 		// TODO: 待支持
 	case reflect.Map, reflect.Struct, reflect.Interface:
-		convertedValue := convertForRecursiveDataStructure(true, value, recursive, tag)
+		convertedValue := convertForRecursiveDataStructure(true, value, recursive, tagPriority...)
 		if m, ok := convertedValue.(map[string]interface{}); ok {
 			return m
 		}
@@ -50,7 +54,7 @@ func convert(value interface{}, recursive bool, tag string) map[string]interface
 	return nil
 }
 
-func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive bool, tag string) interface{} {
+func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive bool, tags ...string) interface{} {
 	if isRoot == false && recursive == false {
 		return value
 	}
@@ -77,7 +81,7 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 				false,
 				reflectValue.MapIndex(k).Interface(),
 				recursive,
-				tag,
+				tags...,
 			)
 		}
 		return dataMap
@@ -101,7 +105,11 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 			mapKey = ""
 			fieldTag := rtField.Tag
 
-			mapKey = fieldTag.Get(tag)
+			for _, tag := range tags {
+				if mapKey = fieldTag.Get(tag); mapKey != "" {
+					break
+				}
+			}
 
 			if recursive || rtField.Anonymous {
 				// 下面开始递归搜索
@@ -124,7 +132,7 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 					)
 					// 如果不是匿名字段
 					if !rtField.Anonymous {
-						dataMap[mapKey] = convertForRecursiveDataStructure(false, rvAttrInterface, recursive, tag)
+						dataMap[mapKey] = convertForRecursiveDataStructure(false, rvAttrInterface, recursive, tags...)
 					} else {
 						// 如果是匿名字段
 						// TODO: 待支持
