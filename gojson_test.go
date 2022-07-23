@@ -1,16 +1,18 @@
 package gojson
 
 import (
+	"fmt"
 	"testing"
 )
 
 func TestContent(t *testing.T) {
 	type Node struct {
-		Node      *Node  `json:"node"`
-		Name      string `json:"name"`
-		Address   string `json:"address,options=[beijing,shanghai]"`
-		Age       int    `json:"age"`
-		Anonymous bool
+		Node      *Node       `json:"node"`
+		Name      string      `json:"name"`
+		Address   string      `json:"address,options=[beijing,shanghai]"`
+		Age       int         `json:"age"`
+		Iface     interface{} `json:"iface"`
+		anonymous bool
 	}
 	tests := []struct {
 		name string
@@ -31,25 +33,28 @@ func TestContent(t *testing.T) {
 						Name:      "asd",
 						Address:   "qwe",
 						Age:       1,
-						Anonymous: false,
+						Iface:     35,
+						anonymous: false,
 					},
 					Name:      "json",
 					Address:   "beijing",
 					Age:       18,
-					Anonymous: false,
+					Iface:     234,
+					anonymous: false,
 				},
 				Name:      "app",
 				Address:   "shanghai",
 				Age:       10,
-				Anonymous: false,
+				Iface:     34,
+				anonymous: false,
 			},
 			want: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			New().LoadContent(tt.data)
-
+			j := New().LoadContent(tt.data)
+			fmt.Println(*j.jsonContent)
 			//if got := New(); !reflect.DeepEqual(got, tt.want) {
 			//	t.Errorf("New() = %v, want %v", got, tt.want)
 			//}

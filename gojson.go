@@ -10,8 +10,8 @@ import (
 type Json struct {
 	mu          *mutex.RWMutex // 开启安全模式:有指针,关闭时:空指针
 	raw         *interface{}
-	jsonContent *interface{}
-	isValid     bool // 查看Json对象是否有效
+	jsonContent *interface{} // 使用指针传递,效率更高
+	isValid     bool         // 查看Json对象是否有效
 }
 
 type iVal interface {
@@ -53,6 +53,7 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 		}
 		return j.parseContent(content, options)
 	default:
+		var pointedData interface{}
 		// TODO: 判断结构体,切片,数组,map等其他类型
 		switch reflect.ValueOf(data).Kind() {
 		// 传入的是结构体的情况:
@@ -70,16 +71,18 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 			if v, ok := data.(iVal); ok {
 				return j.LoadContentWithOptions(v.Val(), options)
 			}
+			pointedData = conv.MapSearch(data, "json")
 
 		case reflect.Map:
-
+			// TODO: 待支持
 		case reflect.Slice, reflect.Array:
-
+			// TODO: 待支持
 		default:
 			fmt.Printf("%v, err: %v", createErr, invalidContentType)
 			j.isValid = false
 			return j
 		}
+		j.jsonContent = &pointedData
 	}
 	j.mu = mutex.New(options.Safe) // 创建读写锁
 	return j
@@ -91,8 +94,4 @@ func (j *Json) LoadFileWithOptions() *Json {
 
 func (j *Json) LoadHttpResponseBodyWithOptions() *Json {
 	return nil
-}
-
-func decode(content *[]byte) {
-	return
 }
