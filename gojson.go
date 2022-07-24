@@ -107,7 +107,13 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 	return j.LoadContent(content)
 }
 
-func (j *Json) LoadHttpResponseBodyWithOptions() *Json {
+func (j *Json) LoadHttpResponseBody(url string) *Json {
+	nilOption := Options{}
+	return j.LoadHttpResponseBodyWithOptions(url, nilOption)
+}
+
+func (j *Json) LoadHttpResponseBodyWithOptions(url string, options Options) *Json {
+	// TODO: 写一个http client
 	return nil
 }
 
@@ -130,7 +136,34 @@ func (j *Json) Unmarshal(dest interface{}) error {
 	return nil
 }
 
-func (j *Json) Get() *Json {
-
+// Get 输出json字符串指定路径的内容
+func (j *Json) Get(pattern string) interface{} {
+	if !j.isValid {
+		fmt.Printf("%v, err: %v", GetErr, invalidContentType)
+		return ""
+	}
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	pointer := j.findContent(pattern)
+	if pointer != nil {
+		return *pointer
+	}
+	fmt.Printf("%v, err: %v", GetErr, invalidPattern)
 	return nil
+}
+
+func (j *Json) DumpAll() *Json {
+	j.mu.Lock()
+	fmt.Println(j)
+	j.mu.Unlock()
+	return j
+}
+
+func (j *Json) DumpContent() *Json {
+	if !j.isValid {
+		fmt.Printf("%v, err: %v", DumpErr, invalidContentType)
+		return j
+	}
+	fmt.Println(j.jsonContent)
+	return j
 }
