@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-func Bytes(any interface{}) []byte {
+func ToBytes(any interface{}) []byte {
 	if any == nil {
 		return nil
 	}

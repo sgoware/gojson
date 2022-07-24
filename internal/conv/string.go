@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func String(any interface{}) string {
+func ToString(any interface{}) string {
 	if any == nil {
 		return ""
 	}
@@ -81,7 +81,7 @@ func String(any interface{}) string {
 		}
 		// 寻找指针所指的值递归查找
 		if kind == reflect.Ptr {
-			return String(rv.Elem().Interface())
+			return ToString(rv.Elem().Interface())
 		}
 
 		if jsonContent, err := json.Marshal(value); err != nil {
