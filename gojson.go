@@ -1,11 +1,14 @@
 package gojson
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"gojson/internal/conv"
 	"gojson/internal/mutex"
+	"io"
+	"os"
 	"reflect"
 )
 
@@ -80,8 +83,28 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 	return j
 }
 
-func (j *Json) LoadFileWithOptions() *Json {
-	return nil
+func (j *Json) LoadFile(path string) *Json {
+	nilOption := Options{}
+	return j.LoadFileWithOptions(path, nilOption)
+}
+func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
+	var content []byte
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Printf("%v, err: %v, %v", createErr, ReadFileErr, err)
+	}
+	r := bufio.NewReader(file)
+	for {
+		lineBytes, err := r.ReadBytes('\n')
+		if err != nil && err != io.EOF {
+			fmt.Printf("%v, err: %v, %v", createErr, ReadFileErr, err)
+		}
+		content = append(content, lineBytes...)
+		if err == io.EOF {
+			break
+		}
+	}
+	return j.LoadContent(content)
 }
 
 func (j *Json) LoadHttpResponseBodyWithOptions() *Json {
@@ -108,5 +131,6 @@ func (j *Json) Unmarshal(dest interface{}) error {
 }
 
 func (j *Json) Get() *Json {
+
 	return nil
 }
