@@ -6,4 +6,5 @@ const (
 	invalidContentType = "invalid content type"
 	decodeErr          = "decode content failed"
 	invalidJsonObject  = "invalid json object"
+	ReadFileErr        = "read file failed"
 )
