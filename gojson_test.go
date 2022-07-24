@@ -116,33 +116,6 @@ func TestJson_LoadContentWithOptions(t *testing.T) {
 	}
 }
 
-func TestJson_LoadFileWithOptions(t *testing.T) {
-	type fields struct {
-		mu          *mutex.RWMutex
-		jsonContent *interface{}
-		isValid     bool
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   *Json
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			j := &Json{
-				mu:          tt.fields.mu,
-				jsonContent: tt.fields.jsonContent,
-				isValid:     tt.fields.isValid,
-			}
-			if got := j.LoadFileWithOptions(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Json.LoadFileWithOptions() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestJson_LoadHttpResponseBodyWithOptions(t *testing.T) {
 	type fields struct {
 		mu          *mutex.RWMutex
@@ -223,6 +196,44 @@ func TestJson_Get(t *testing.T) {
 			}
 			if got := j.Get(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Json.Get() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJson_LoadFile(t *testing.T) {
+	type fields struct {
+		mu          *mutex.RWMutex
+		jsonContent *interface{}
+		isValid     bool
+	}
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *Json
+	}{
+		{
+			name: "case",
+			fields: fields{
+				isValid: true,
+			},
+			args: args{path: "./test.txt"},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			j := &Json{
+				mu:          tt.fields.mu,
+				jsonContent: tt.fields.jsonContent,
+				isValid:     tt.fields.isValid,
+			}
+			if got := j.LoadFile(tt.args.path); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Json.LoadFile() = %v, want %v", got, tt.want)
 			}
 		})
 	}
