@@ -106,7 +106,8 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 			}
 			mapKey = ""
 			fieldTag := rtField.Tag
-
+			// TODO: bug: mapkey会把omitempty算进去变成 "example_string,omitempty"
+			// `json:"example_string,omitempty"`
 			for _, tag := range tags {
 				if mapKey = fieldTag.Get(tag); mapKey != "" {
 					break
