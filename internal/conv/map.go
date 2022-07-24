@@ -40,10 +40,12 @@ func convert(value interface{}, recursive bool, tags ...string) map[string]inter
 		reflectKind = reflectValue.Kind()
 	}
 	switch reflectKind {
-	case reflect.Slice, reflect.Array:
-		// TODO: 待支持
 	case reflect.Map, reflect.Struct, reflect.Interface:
-		convertedValue := convertForRecursiveDataStructure(true, value, recursive, tagPriority...)
+		convertedValue := convertForRecursiveDataStructure(true,
+			value,
+			recursive,
+			tagPriority...,
+		)
 		if m, ok := convertedValue.(map[string]interface{}); ok {
 			return m
 		}
@@ -77,7 +79,7 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 			dataMap = make(map[string]interface{})
 		)
 		for _, k := range mapKeys {
-			dataMap[String(k.Interface())] = convertForRecursiveDataStructure(
+			dataMap[ToString(k.Interface())] = convertForRecursiveDataStructure(
 				false,
 				reflectValue.MapIndex(k).Interface(),
 				recursive,
@@ -132,16 +134,58 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 					)
 					// 如果不是匿名字段
 					if !rtField.Anonymous {
-						dataMap[mapKey] = convertForRecursiveDataStructure(false, rvAttrInterface, recursive, tags...)
+						dataMap[mapKey] = convertForRecursiveDataStructure(false,
+							rvAttrInterface,
+							recursive,
+							tags...,
+						)
 					} else {
 						// 如果是匿名字段
-						// TODO: 待支持
+
+						anonymousValue := convertForRecursiveDataStructure(false,
+							rvAttrInterface,
+							true,
+							tags...,
+						)
+						// 如果匿名字段是可递归结构 (struct,map...)
+						if m, ok := anonymousValue.(map[string]interface{}); ok {
+							for k, v := range m {
+								dataMap[k] = v
+							}
+						} else {
+							// 如果匿名字段是不可递归结构 (int,float,string...)
+							dataMap[mapKey] = rvAttrInterface
+						}
+
 					}
 
 				case reflect.Array, reflect.Slice:
-					// TODO: 待支持
+					length := rvAttrField.Len()
+					if length == 0 {
+						dataMap[mapKey] = rvAttrField.Interface()
+						break
+					}
+					array := make([]interface{}, length)
+					for i := 0; i < length; i++ {
+						array[i] = convertForRecursiveDataStructure(
+							false,
+							rvAttrField.Index(i),
+							recursive,
+							tags...,
+						)
+					}
 				case reflect.Map:
-					// TODO: 待支持
+					mapKeys := rvAttrField.MapKeys()
+					nestedMap := make(map[string]interface{})
+					for _, key := range mapKeys {
+						nestedMap[ToString(key.Interface())] = convertForRecursiveDataStructure(
+							false,
+							rvAttrField.MapIndex(key).Interface(),
+							recursive,
+							tags...,
+						)
+						dataMap[mapKey] = nestedMap
+					}
 				default:
 					// 递归到最底层了
 					if rvField.IsValid() {
@@ -163,9 +207,21 @@ func convertForRecursiveDataStructure(isRoot bool, value interface{}, recursive 
 			return value
 		}
 		return dataMap
-
+		// 若是数组或切片,则返回空接口切片
 	case reflect.Array, reflect.Slice:
-		// TODO: 待支持
+		length := reflectValue.Len()
+		if length == 0 {
+			break
+		}
+		array := make([]interface{}, length)
+		for i := 0; i < length; i++ {
+			array[i] = convertForRecursiveDataStructure(
+				false,
+				reflectValue.Index(i),
+				recursive,
+				tags...)
+		}
+		return array
 	}
 	return value
 }

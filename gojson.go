@@ -15,10 +15,6 @@ type Json struct {
 	isValid     bool           // 查看Json对象是否有效
 }
 
-type iVal interface {
-	Val() interface{}
-}
-
 func New() *Json {
 	j := &Json{isValid: true} // 默认为有效对象,后续遇到错误设置为无效对象
 	return j
@@ -41,13 +37,13 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 	}
 	switch data.(type) {
 	// 传入的已经是解码好的json数据的情况
-	case []interface{}, map[string]interface{}, map[string][]interface{}:
+	case map[string]interface{}, map[string][]interface{}:
 		j.jsonContent = &data
 	// 传入的是字符串或者bytes的情况:
 	// 判断数据的格式(json,yaml,toml...),转化成json格式
 	// 然后将数据解码成map[string]interface{}的形式
 	case string, []byte:
-		content := conv.Bytes(data)
+		content := conv.ToBytes(data)
 		if len(content) == 0 {
 			j.isValid = false
 			return j
@@ -55,11 +51,11 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 		return j.parseContent(content, options)
 	default:
 		var pointedData interface{}
-		// TODO: 判断结构体,切片,数组,map等其他类型
 		switch reflect.ValueOf(data).Kind() {
-		// 传入的是结构体的情况:
-		// 递归结构体
-		case reflect.Struct:
+
+		case reflect.Struct, reflect.Map:
+			// 传入的是可递归结构的情况:
+
 			// 如果结构体是接口的情况:
 			// 取值然后再递归下去
 			// 方法①:
@@ -69,15 +65,10 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 			//   直接将结构体转化成map[string]interface{}
 			//   利用反射层层递归
 			// 这里采用方法②
-			if v, ok := data.(iVal); ok {
-				return j.LoadContentWithOptions(v.Val(), options)
-			}
 			pointedData = conv.MapSearch(data, "json")
-
-		case reflect.Map:
-			// TODO: 待支持
 		case reflect.Slice, reflect.Array:
-			// TODO: 待支持
+			// 返回空接口切片
+			pointedData = conv.ToInterfaces(data)
 		default:
 			fmt.Printf("%v, err: %v", createErr, invalidContentType)
 			j.isValid = false
