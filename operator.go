@@ -14,9 +14,9 @@ func (j *Json) findContentPointer(pattern string) *interface{} {
 	}
 	// "."返回全部内容
 	if pattern == "." {
-		return j.jsonContent
+		return j.JsonContent
 	}
-	pointer := j.jsonContent
+	pointer := j.JsonContent
 	nodes := strings.Split(pattern, ".")
 	for _, n := range nodes {
 		if stringx.IsIndex(n) {
@@ -77,22 +77,22 @@ func (j *Json) setContentWithOptions(pattern string, data interface{}, options O
 
 	// "."替换全部内容
 	if pattern == "." {
-		j.jsonContent = &content
+		j.JsonContent = &content
 		return nil
 	}
 	nodes := strings.Split(pattern, ".")
 	nodesLength := len(nodes)
 	// 设置内容时,如果jsonContent为空指针需要初始化
 	// 防止删除jsonContent后指针为空的情况
-	if *j.jsonContent == nil {
+	if *j.JsonContent == nil {
 		if stringx.IsIndex(nodes[0]) {
-			*j.jsonContent = make([]interface{}, 0)
+			*j.JsonContent = make([]interface{}, 0)
 		} else {
-			*j.jsonContent = make(map[string]interface{})
+			*j.JsonContent = make(map[string]interface{})
 		}
 	}
 	var parentPointer *interface{} = nil // 当前节点的父节点的指针
-	curPointer := j.jsonContent          // 当前节点的指针
+	curPointer := j.JsonContent          // 当前节点的指针
 	// 开始遍历path的各个节点
 	for i := 0; i < nodesLength; i++ {
 		switch (*curPointer).(type) {
