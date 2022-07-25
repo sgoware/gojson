@@ -3,6 +3,7 @@ package gojson
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gojson/internal/encoding/ini"
 	"gojson/internal/encoding/toml"
@@ -11,14 +12,12 @@ import (
 	"gojson/internal/regex"
 )
 
-func (j *Json) parseContent(content []byte, options Options) *Json {
+func (j *Json) parseContent(content []byte, options Options) (interface{}, error) {
 	var err error
 	if options.ContentType == "" {
 		options.ContentType = getContentType(content)
 		if options.ContentType == "" {
-			fmt.Printf("%v,err: %v\n", createErr, invalidContentType)
-			j.isValid = false
-			return j
+			return nil, errors.New(invalidContentType)
 		}
 	}
 	switch options.ContentType {
@@ -26,23 +25,19 @@ func (j *Json) parseContent(content []byte, options Options) *Json {
 
 	case ContentTypeXml:
 		if content, err = xml.ToJson(content); err != nil {
-			j.isValid = false
-			return j
+			return nil, errors.New(invalidContentType)
 		}
 	case ContentTypeYaml:
 		if content, err = yaml.ToJson(content); err != nil {
-			j.isValid = false
-			return j
+			return nil, errors.New(invalidContentType)
 		}
 	case ContentTypeToml:
 		if content, err = toml.ToJson(content); err != nil {
-			j.isValid = false
-			return j
+			return nil, errors.New(invalidContentType)
 		}
 	case ContentTypeIni:
 		if content, err = ini.ToJson(content); err != nil {
-			j.isValid = false
-			return j
+			return nil, errors.New(invalidContentType)
 		}
 	}
 
@@ -56,18 +51,15 @@ func (j *Json) parseContent(content []byte, options Options) *Json {
 	}
 	if err := decoder.Decode(&jsonContent); err != nil {
 		fmt.Printf("%v, err: %v", decodeErr, err)
-		j.isValid = false
-		return j
+		return nil, errors.New(decodeErr + "->" + err.Error())
 	}
 	switch jsonContent.(type) {
 	// 解码器没有把数据解析成map[string]interface{}的情况
 	case string, []byte:
-		fmt.Printf("%v", decoder)
-		j.isValid = false
-		return j
+		return nil, errors.New(decodeErr)
 	}
 	// 携带解析完后的jsonContent递归下去
-	return j.LoadContentWithOptions(jsonContent, options)
+	return jsonContent, nil
 }
 
 // getContentType 通过正则表达式判断数据的格式
