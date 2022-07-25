@@ -12,12 +12,12 @@ import (
 
 type Json struct {
 	mu          *mutex.RWMutex // 开启安全模式:有指针,关闭时:空指针
-	jsonContent *interface{}   // 使用指针传递,效率更高
-	isValid     bool           // 查看Json对象是否有效
+	JsonContent *interface{}   // 使用指针传递,效率更高
+	IsValid     bool           // 查看Json对象是否有效
 }
 
 func New() *Json {
-	j := &Json{isValid: true} // 默认为有效对象,后续遇到错误设置为无效对象
+	j := &Json{IsValid: true} // 默认为有效对象,后续遇到错误设置为无效对象
 	return j
 }
 
@@ -32,17 +32,16 @@ func (j *Json) LoadContent(data interface{}) *Json {
 func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 	if data == nil {
 		fmt.Printf("%v,err: %v\n", createErr, emptyContest)
-		// TODO: 后面用json的时候需要判断Json对象是否有效
-		j.isValid = false
+		j.IsValid = false
 		return j
 	}
 	content, err := j.convertContent(data, options)
 	if err != nil {
 		fmt.Printf("%v, err: %v", createErr, err)
-		j.isValid = false
+		j.IsValid = false
 		return j
 	}
-	j.jsonContent = &content
+	j.JsonContent = &content
 	j.mu = mutex.New(options.Safe) // 创建读写锁
 	return j
 }
@@ -68,7 +67,7 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 			break
 		}
 	}
-	return j.LoadContent(content)
+	return j.LoadContentWithOptions(content, options)
 }
 
 func (j *Json) LoadHttpResponseBody(url string) *Json {
@@ -82,12 +81,12 @@ func (j *Json) LoadHttpResponseBodyWithOptions(url string, options Options) *Jso
 }
 
 func (j *Json) Unmarshal(dest interface{}) error {
-	if !j.isValid {
+	if !j.IsValid {
 		return errors.New(invalidJsonObject)
 	}
 	j.mu.Lock()
-	bytes, err := json.Marshal(*j.jsonContent)
-	j.mu.Unlock()
+	defer j.mu.Unlock()
+	bytes, err := json.Marshal(*j.JsonContent)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -102,7 +101,7 @@ func (j *Json) Unmarshal(dest interface{}) error {
 
 // Get 输出json字符串指定路径的内容
 func (j *Json) Get(pattern string) interface{} {
-	if !j.isValid {
+	if !j.IsValid {
 		fmt.Printf("%v, err: %v", getErr, invalidJsonObject)
 		return ""
 	}
@@ -123,7 +122,7 @@ func (j *Json) Set(pattern string, data interface{}) error {
 }
 
 func (j *Json) SetWithOptions(pattern string, data interface{}, options Options) error {
-	if !j.isValid {
+	if !j.IsValid {
 		return errors.New(invalidJsonObject)
 	}
 	if data == nil {
@@ -133,24 +132,31 @@ func (j *Json) SetWithOptions(pattern string, data interface{}, options Options)
 	defer j.mu.Unlock()
 	err := j.setContentWithOptions(pattern, data, options)
 	if err != nil {
-		j.isValid = false
+		j.IsValid = false
 		return err
 	}
 	return nil
 }
 
-func (j *Json) DumpAll() *Json {
-	j.mu.Lock()
-	fmt.Println(j)
-	j.mu.Unlock()
+func (j *Json) Dump() *Json {
+	nilOptions := DumpOption{}
+	DumpWithOption(j, nilOptions)
 	return j
 }
 
 func (j *Json) DumpContent() *Json {
-	if !j.isValid {
+	nilOptions := DumpOption{}
+	j.DumpWithOptions(j.JsonContent, nilOptions)
+	return j
+}
+
+func (j *Json) DumpWithOptions(data interface{}, options DumpOption) *Json {
+	j.mu.Lock()
+	defer j.mu.Lock()
+	if !j.IsValid {
 		fmt.Printf("%v, err: %v", dumpErr, invalidContentType)
 		return j
 	}
-	fmt.Println(j.jsonContent)
+	DumpWithOption(data, options)
 	return j
 }
