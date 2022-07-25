@@ -59,8 +59,8 @@ func TestJson_LoadContent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			j := &Json{
 				mu:          tt.fields.mu,
-				jsonContent: tt.fields.jsonContent,
-				isValid:     tt.fields.isValid,
+				JsonContent: tt.fields.jsonContent,
+				IsValid:     tt.fields.isValid,
 			}
 			if got := j.LoadContent(tt.args.data); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Json.LoadContent() = %v, want %v", got, tt.want)
@@ -97,8 +97,8 @@ func TestJson_LoadFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			j := &Json{
 				mu:          tt.fields.mu,
-				jsonContent: tt.fields.jsonContent,
-				isValid:     tt.fields.isValid,
+				JsonContent: tt.fields.jsonContent,
+				IsValid:     tt.fields.isValid,
 			}
 			if got := j.LoadFile(tt.args.path); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Json.LoadFile() = %v, want %v", got, tt.want)
@@ -156,4 +156,19 @@ func TestJson_Change(t *testing.T) {
 	fmt.Println(j.Get("example_int"))
 	j.Set("example_int", 888)
 	fmt.Println(j.Get("example_int"))
+}
+
+func TestJson_DumpContent(t *testing.T) {
+	node := NestedStruct{
+		Nested: &CommonStruct{
+			ExampleInt:     34,
+			ExampleFloat64: 213.3,
+			ExampleString:  "asdwq",
+		},
+		ExampleInt:     345,
+		ExampleFloat64: 2342.234,
+		ExampleString:  "asdfawf",
+	}
+	j := New().LoadContent([]interface{}{node, node, node})
+	j.Dump()
 }
