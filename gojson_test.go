@@ -120,4 +120,40 @@ func TestJson_Get(t *testing.T) {
 	}
 	j := New().LoadContent(node)
 	fmt.Println(j.Get("example_int"))
+	fmt.Println(j.Get("nested.example_int"))
+}
+
+func TestJson_Set(t *testing.T) {
+	node := NestedStruct{
+		Nested: &CommonStruct{
+			ExampleInt:     34,
+			ExampleFloat64: 213.3,
+			ExampleString:  "asdwq",
+		},
+		ExampleInt:     345,
+		ExampleFloat64: 2342.234,
+		ExampleString:  "asdfawf",
+	}
+	j := New().LoadContent(node)
+	fmt.Println(j.Get("example_int"))
+	fmt.Println(j.Get("nested.example_int"))
+	j.Set("example_int", 222)
+	fmt.Println(j.Get("example_int"))
+}
+
+func TestJson_Change(t *testing.T) {
+	node := NestedStruct{
+		Nested: &CommonStruct{
+			ExampleInt:     34,
+			ExampleFloat64: 213.3,
+			ExampleString:  "asdwq",
+		},
+		ExampleInt:     345,
+		ExampleFloat64: 2342.234,
+		ExampleString:  "asdfawf",
+	}
+	j := New().LoadContent(node)
+	fmt.Println(j.Get("example_int"))
+	j.Set("example_int", 888)
+	fmt.Println(j.Get("example_int"))
 }
