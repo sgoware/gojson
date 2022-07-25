@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gojson/internal/conv"
 	"gojson/internal/mutex"
 	"io"
 	"os"
-	"reflect"
 )
 
 type Json struct {
@@ -38,47 +36,13 @@ func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 		j.isValid = false
 		return j
 	}
-	switch data.(type) {
-	// 传入的已经是解码好的json数据的情况
-	case map[string]interface{}, map[string][]interface{}:
-		j.jsonContent = &data
-	// 传入的是字符串或者bytes的情况:
-	// 判断数据的格式(json,yaml,toml...),转化成json格式
-	// 然后将数据解码成map[string]interface{}的形式
-	case string, []byte:
-		content := conv.ToBytes(data)
-		if len(content) == 0 {
-			j.isValid = false
-			return j
-		}
-		return j.parseContent(content, options)
-	default:
-		var pointedData interface{}
-		switch reflect.ValueOf(data).Kind() {
-
-		case reflect.Struct, reflect.Map:
-			// 传入的是可递归结构的情况:
-
-			// 如果结构体是接口的情况:
-			// 取值然后再递归下去
-			// 方法①:
-			//   先将结构体marshal成[]bytes,然后unmarshal成map[string]interface{}
-			//   但是效率慢,这里想自己写个递归方法
-			// 方法②:
-			//   直接将结构体转化成map[string]interface{}
-			//   利用反射层层递归
-			// 这里采用方法②
-			pointedData = conv.MapSearch(data, "json")
-		case reflect.Slice, reflect.Array:
-			// 返回空接口切片
-			pointedData = conv.ToInterfaces(data)
-		default:
-			fmt.Printf("%v, err: %v", createErr, invalidContentType)
-			j.isValid = false
-			return j
-		}
-		j.jsonContent = &pointedData
+	content, err := j.convertContent(data, options)
+	if err != nil {
+		fmt.Printf("%v, err: %v", createErr, err)
+		j.isValid = false
+		return j
 	}
+	j.jsonContent = &content
 	j.mu = mutex.New(options.Safe) // 创建读写锁
 	return j
 }
@@ -91,13 +55,13 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 	var content []byte
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Printf("%v, err: %v, %v", createErr, ReadFileErr, err)
+		fmt.Printf("%v, err: %v, %v", createErr, readFileErr, err)
 	}
 	r := bufio.NewReader(file)
 	for {
 		lineBytes, err := r.ReadBytes('\n')
 		if err != nil && err != io.EOF {
-			fmt.Printf("%v, err: %v, %v", createErr, ReadFileErr, err)
+			fmt.Printf("%v, err: %v, %v", createErr, readFileErr, err)
 		}
 		content = append(content, lineBytes...)
 		if err == io.EOF {
@@ -139,16 +103,39 @@ func (j *Json) Unmarshal(dest interface{}) error {
 // Get 输出json字符串指定路径的内容
 func (j *Json) Get(pattern string) interface{} {
 	if !j.isValid {
-		fmt.Printf("%v, err: %v", GetErr, invalidContentType)
+		fmt.Printf("%v, err: %v", getErr, invalidJsonObject)
 		return ""
 	}
 	j.mu.Lock()
 	defer j.mu.Unlock()
-	pointer := j.findContent(pattern)
+	pointer := j.findContentPointer(pattern)
 	if pointer != nil {
 		return *pointer
 	}
-	fmt.Printf("%v, err: %v", GetErr, invalidPattern)
+	fmt.Printf("%v, err: %v", getErr, invalidPattern)
+	return nil
+}
+
+// Set 支持数据替换,插入,删除  data为空为删除
+func (j *Json) Set(pattern string, data interface{}) error {
+	nilOptions := Options{}
+	return j.SetWithOptions(pattern, data, nilOptions)
+}
+
+func (j *Json) SetWithOptions(pattern string, data interface{}, options Options) error {
+	if !j.isValid {
+		return errors.New(invalidJsonObject)
+	}
+	if data == nil {
+		return errors.New(emptyContest)
+	}
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	err := j.setContentWithOptions(pattern, data, options)
+	if err != nil {
+		j.isValid = false
+		return err
+	}
 	return nil
 }
 
@@ -161,7 +148,7 @@ func (j *Json) DumpAll() *Json {
 
 func (j *Json) DumpContent() *Json {
 	if !j.isValid {
-		fmt.Printf("%v, err: %v", DumpErr, invalidContentType)
+		fmt.Printf("%v, err: %v", dumpErr, invalidContentType)
 		return j
 	}
 	fmt.Println(j.jsonContent)
