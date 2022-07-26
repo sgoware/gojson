@@ -70,16 +70,6 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 	return j.LoadContentWithOptions(content, options)
 }
 
-func (j *Json) LoadHttpResponseBody(url string) *Json {
-	nilOption := Options{}
-	return j.LoadHttpResponseBodyWithOptions(url, nilOption)
-}
-
-func (j *Json) LoadHttpResponseBodyWithOptions(url string, options Options) *Json {
-	// TODO: 写一个http client
-	return nil
-}
-
 func (j *Json) Unmarshal(dest interface{}) error {
 	if !j.IsValid {
 		return errors.New(invalidJsonObject)
@@ -125,9 +115,6 @@ func (j *Json) SetWithOptions(pattern string, data interface{}, options Options)
 	if !j.IsValid {
 		return errors.New(invalidJsonObject)
 	}
-	if data == nil {
-		return errors.New(emptyContest)
-	}
 	j.mu.Lock()
 	defer j.mu.Unlock()
 	err := j.setContentWithOptions(pattern, data, options)
@@ -140,7 +127,7 @@ func (j *Json) SetWithOptions(pattern string, data interface{}, options Options)
 
 func (j *Json) Dump() *Json {
 	nilOptions := DumpOption{}
-	DumpWithOption(j, nilOptions)
+	j.DumpWithOptions(j, nilOptions)
 	return j
 }
 
@@ -157,6 +144,6 @@ func (j *Json) DumpWithOptions(data interface{}, options DumpOption) *Json {
 		fmt.Printf("%v, err: %v", dumpErr, invalidContentType)
 		return j
 	}
-	DumpWithOption(data, options)
+	dumpWithOption(data, options)
 	return j
 }
