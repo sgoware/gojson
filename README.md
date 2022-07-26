@@ -78,51 +78,6 @@ gojson是一个支持数据多种方式读取，智能解析，操作便捷的�
 </pre>
 </details>
 
-# 📌 TODO
-
-- json的序列化
-
-    - [x] `string`，`[]byte`的序列化
-
-    - [x] `json`格式
-
-    - [x] 其他类型的格式(`toml`，`yaml`，`xml`，`ini`)
-        - [x] toml
-    
-        - [x] yaml
-    
-        - [ ] xml
-    
-        - [x] ini
-    
-    - [x] 结构体序列化
-    
-    - [x] 切片,数组序列化
-    
-    - [x] `map`序列化
-    
-    - [x] 多`tag`校验
-    
-    - [x] 从文件读取
-    
-    - [ ] 发起http请求并读取
-- json的反序列化
-  - [x] 映射到结构体
-- json可视化
-  - [x] map
-  - [x] 切片
-  - [x] 结构体
-- json的数据操作
-
-    - [x] 查找
-    - [x] 修改
-    - [x] 插入
-    - [x] 删除
-
-# 🛠 环境要求
-
-- golang 版本 >= 1.18
-
 # 🎬 快速开始
 
 ## 创建json对象(初始化)
@@ -393,7 +348,52 @@ output:
 
 # 📊 性能测试
 
+# 🛠 环境要求
 
+- golang 版本 >= 1.18
+
+# 📌 TODO
+
+- json的序列化
+
+    - [x] `string`，`[]byte`的序列化
+
+    - [x] `json`格式
+
+    - [x] 其他类型的格式(`toml`，`yaml`，`xml`，`ini`)
+        - [x] toml
+
+        - [x] yaml
+
+        - [ ] xml
+
+        - [x] ini
+
+    - [x] 结构体序列化
+
+    - [x] 切片,数组序列化
+
+    - [x] `map`序列化
+
+    - [x] 多`tag`校验
+
+    - [x] 从文件读取
+
+    - [ ] 发起http请求并读取
+- json的反序列化
+    - [x] 映射到结构体
+- json可视化
+    - [x] map
+    - [x] 切片
+    - [x] 结构体
+- json的数据操作
+
+    - [x] 查找
+    - [x] 修改
+    - [x] 插入
+    - [x] 删除
+
+# 🎈 结语
 
 # 📔 参考文献
 
@@ -403,12 +403,8 @@ output:
 
 [GitHub mapstructure](https://github.com/mitchellh/mapstructure)
 
-# 🎈 结语
-
-
-
 # 🔑 JetBrains 开源证书支持
 
-`gojson` 项目一直以来都是在 JetBrains 公司旗下的 GoLand 集成开发环境中进行开发，基于 **free JetBrains Open Source license(s)** 正版免费授权，在此表达我的谢意。
+感谢JetBrains提供的Goland支持
 
 <a href="https://www.jetbrains.com/?from=gnet" target="_blank"><img src="https://raw.githubusercontent.com/panjf2000/illustrations/master/jetbrains/jetbrains-variant-4.png" width="250" align="middle"/></a>
