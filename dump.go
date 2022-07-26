@@ -48,22 +48,21 @@ var (
 	})
 )
 
-func Dump(values ...interface{}) {
+func dump(values ...interface{}) {
 	for _, value := range values {
-		DumpWithOption(value, DumpOption{
+		dumpWithOption(value, DumpOption{
 			WithType:     false,
 			ExportedOnly: false,
 		})
 	}
 }
 
-func DumpWithOption(value interface{}, options DumpOption) {
+func dumpWithOption(value interface{}, options DumpOption) {
 	buffer := bytes.NewBuffer(nil)
 	doDump(value, "", buffer, DumpOption{
 		WithType:     options.WithType,
 		ExportedOnly: options.ExportedOnly,
 	})
-	_, _ = buffer.Write(buffer.Bytes())
 	fmt.Println(buffer.String())
 }
 
@@ -234,13 +233,14 @@ func doDumpMap(buf dumpBuf) {
 	}
 	for _, mapKey := range mapKeys {
 		// 根据key遍历map
+
+		// 输出map的key和缩进
 		curSpaceNum := len(fmt.Sprintf(`%v`, mapKey.Interface()))
 		if mapKey.Kind() == reflect.String {
 			mapKeyStr = fmt.Sprintf(`"%v"`, mapKey.Interface())
 		} else {
 			mapKeyStr = fmt.Sprintf(`%v`, mapKey.Interface())
 		}
-		// 输出map的key和缩进
 		if !buf.Option.WithType {
 			buf.Buffer.WriteString(fmt.Sprintf(
 				"%s%v:%s",
@@ -289,7 +289,10 @@ func doDumpStruct(buf dumpBuf) {
 	if !buf.Option.WithType {
 		buf.Buffer.WriteString("{\n")
 	} else {
-		buf.Buffer.WriteString(fmt.Sprintf("%s(%d) {\n", buf.ReflectTypeName, len(structFields)))
+		buf.Buffer.WriteString(fmt.Sprintf("%s(%d) {\n",
+			buf.ReflectTypeName,
+			len(structFields)),
+		)
 	}
 	for _, field := range structFields {
 		// 遍历字段
