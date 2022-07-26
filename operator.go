@@ -31,7 +31,7 @@ func (j *Json) findContentPointer(pattern string) *interface{} {
 					i > arrLen-1 {
 					return nil
 				}
-				return &arr[i]
+				pointer = &arr[i]
 			}
 		} else {
 			// 在map中寻找
