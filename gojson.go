@@ -13,11 +13,10 @@ import (
 type Json struct {
 	mu          *mutex.RWMutex // 开启安全模式:有指针,关闭时:空指针
 	JsonContent *interface{}   // 使用指针传递,效率更高
-	IsValid     bool           // 查看Json对象是否有效
 }
 
 func New() *Json {
-	j := &Json{IsValid: true} // 默认为有效对象,后续遇到错误设置为无效对象
+	j := &Json{} // 默认为有效对象,后续遇到错误设置为无效对象
 	return j
 }
 
@@ -32,14 +31,12 @@ func (j *Json) LoadContent(data interface{}) *Json {
 func (j *Json) LoadContentWithOptions(data interface{}, options Options) *Json {
 	if data == nil {
 		fmt.Printf("%v,err: %v\n", createErr, emptyContest)
-		j.IsValid = false
-		return j
+		return nil
 	}
 	content, err := j.convertContent(data, options)
 	if err != nil {
 		fmt.Printf("%v, err: %v", createErr, err)
-		j.IsValid = false
-		return j
+		return nil
 	}
 	j.JsonContent = &content
 	j.mu = mutex.New(options.Safe) // 创建读写锁
@@ -55,12 +52,14 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Printf("%v, err: %v, %v", createErr, readFileErr, err)
+		return nil
 	}
 	r := bufio.NewReader(file)
 	for {
 		lineBytes, err := r.ReadBytes('\n')
 		if err != nil && err != io.EOF {
 			fmt.Printf("%v, err: %v, %v", createErr, readFileErr, err)
+			return nil
 		}
 		content = append(content, lineBytes...)
 		if err == io.EOF {
@@ -71,7 +70,7 @@ func (j *Json) LoadFileWithOptions(path string, options Options) *Json {
 }
 
 func (j *Json) Unmarshal(dest interface{}) error {
-	if !j.IsValid {
+	if j == nil {
 		return errors.New(invalidJsonObject)
 	}
 	j.mu.Lock()
@@ -91,7 +90,7 @@ func (j *Json) Unmarshal(dest interface{}) error {
 
 // Get 输出json字符串指定路径的内容
 func (j *Json) Get(pattern string) interface{} {
-	if !j.IsValid {
+	if j == nil {
 		fmt.Printf("%v, err: %v", getErr, invalidJsonObject)
 		return ""
 	}
@@ -106,23 +105,24 @@ func (j *Json) Get(pattern string) interface{} {
 }
 
 // Set 支持数据替换,插入,删除  data为空为删除
-func (j *Json) Set(pattern string, data interface{}) error {
+func (j *Json) Set(pattern string, data interface{}) *Json {
 	nilOptions := Options{}
 	return j.SetWithOptions(pattern, data, nilOptions)
 }
 
-func (j *Json) SetWithOptions(pattern string, data interface{}, options Options) error {
-	if !j.IsValid {
-		return errors.New(invalidJsonObject)
+func (j *Json) SetWithOptions(pattern string, data interface{}, options Options) *Json {
+	if j == nil {
+		fmt.Printf("%v, err: %v", setErr, invalidPattern)
+		return nil
 	}
 	j.mu.Lock()
 	defer j.mu.Unlock()
 	err := j.setContentWithOptions(pattern, data, options)
 	if err != nil {
-		j.IsValid = false
-		return err
+		fmt.Printf("%v, err: %v", setErr, invalidPattern)
+		return nil
 	}
-	return nil
+	return j
 }
 
 func (j *Json) Dump() *Json {
@@ -140,7 +140,7 @@ func (j *Json) DumpContent() *Json {
 func (j *Json) DumpWithOptions(data interface{}, options DumpOption) *Json {
 	j.mu.Lock()
 	defer j.mu.Lock()
-	if !j.IsValid {
+	if j == nil {
 		fmt.Printf("%v, err: %v", dumpErr, invalidContentType)
 		return j
 	}

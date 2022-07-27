@@ -1,14 +1,15 @@
 package gojson
 
 const (
-	createErr          = "create gojson object failed"
+	createErr   = "create gojson object failed"
+	setErr      = "set content failed"
+	getErr      = "get content failed"
+	dumpErr     = "dump failed"
+	decodeErr   = "decode content failed"
+	readFileErr = "read file failed"
+
 	emptyContest       = "get empty content"
 	invalidContentType = "invalid content type"
-	decodeErr          = "decode content failed"
 	invalidJsonObject  = "invalid json object"
-	readFileErr        = "read file failed"
-	dumpErr            = "dump failed"
-	getErr             = "get content failed"
 	invalidPattern     = "invalid pattern string"
-	changeErr          = "change content failed"
 )
