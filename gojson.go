@@ -112,7 +112,7 @@ func (j *Json) Set(pattern string, data interface{}) *Json {
 
 func (j *Json) SetWithOptions(pattern string, data interface{}, options Options) *Json {
 	if j == nil {
-		fmt.Printf("%v, err: %v", setErr, invalidPattern)
+		fmt.Printf("%v, err: %v", setErr, invalidJsonObject)
 		return nil
 	}
 	j.mu.Lock()
